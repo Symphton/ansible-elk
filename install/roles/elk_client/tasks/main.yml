@@ -1,9 +1,9 @@
 ---
 
-- name: Copy ElasticSearch yum repo file
+- name: Copy elastic yum repo file
   copy:
-    src=elk.repo
-    dest=/etc/yum.repos.d/elk.repo
+    src=elastic.repo
+    dest=/etc/yum.repos.d/elastic.repo
     owner=root
     group=root
     mode=0644

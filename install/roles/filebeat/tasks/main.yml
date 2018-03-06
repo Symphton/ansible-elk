@@ -18,16 +18,12 @@
     mode=0644
   become: true
   when: (logging_backend != 'fluentd')
-  register: filebeat_needs_restart
 
-- name: Start filebeat service
-  command: systemctl start filebeat.service
-  ignore_errors: true
-  become: true
-  when: ((filebeat_needs_restart != 0) and (logging_backend != 'fluentd'))
-
-- name: Setup filebeat service
-  service: name=filebeat state=started enabled=true
+- name: Start and enable filebeat service
+  systemd:
+    name: filebeat
+    state: restarted
+    enabled: true
   become: true
   when: (logging_backend != 'fluentd')
 
@@ -53,11 +49,13 @@
     group=root
     mode=0644
   become: true
-  register: rsyslog_updated
   when: (logging_backend == 'fluentd')
 
 - name: Restarting rsyslog for fluentd
-  command: systemctl restart rsyslog.service
+  systemd:
+    name: rsyslog
+    state: restarted
+    enabled: true
   ignore_errors: true
-  when: rsyslog_updated != 0
+  when: (logging_backend == 'fluentd')
   become: true

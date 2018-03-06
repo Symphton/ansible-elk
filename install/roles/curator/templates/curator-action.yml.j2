@@ -1,5 +1,5 @@
 actions:
-#Closes indicies after 14 days to save on RAM
+#Closes indicies after 7 days to save on RAM
   1:
     action: close
     description: close indices
@@ -15,7 +15,7 @@ actions:
       direction: older
       timestring: '%Y.%m.%d'
       unit: days
-      unit_count: 14
+      unit_count: 7
       exclude:
 #Deletes indicies after 30 days to clean up storage space.
   2:

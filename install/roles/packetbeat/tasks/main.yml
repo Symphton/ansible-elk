@@ -19,15 +19,11 @@
     mode=0644
   become: true
   when: (logging_backend != 'fluentd')
-  register: packetbeat_needs_restart
 
-- name: Start packetbeat service
-  command: systemctl start packetbeat.service
-  ignore_errors: true
-  become: true
-  when: ((packetbeat_needs_restart != 0) and (logging_backend != 'fluentd'))
-
-- name: Setup packetbeat service
-  service: name=packetbeat state=started enabled=true
+- name: Start and enable packetbeat service
+  systemd:
+    name: packetbeat
+    state: restarted
+    enabled: true
   become: true
   when: (logging_backend != 'fluentd')

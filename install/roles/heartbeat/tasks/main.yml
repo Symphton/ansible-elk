@@ -6,7 +6,7 @@
   yum: name={{ item }} state=present
   become: true
   with_items:
-    - heartbeat
+    - heartbeat-elastic
   when: (logging_backend != 'fluentd')
 
 - name: Generate heartbeat configuration template
@@ -18,15 +18,11 @@
     mode=0644
   become: true
   when: (logging_backend != 'fluentd')
-  register: heartbeat_needs_restart
 
-- name: Start heartbeat service
-  command: systemctl start heartbeat.service
-  ignore_errors: true
-  become: true
-  when: ((heartbeat_needs_restart != 0) and (logging_backend != 'fluentd'))
-
-- name: Setup heartbeat service
-  service: name=heartbeat state=started enabled=true
+- name: Start and enable heartbeat service
+  systemd:
+    name: heartbeat-elastic
+    state: restarted
+    enabled: true
   become: true
   when: (logging_backend != 'fluentd')

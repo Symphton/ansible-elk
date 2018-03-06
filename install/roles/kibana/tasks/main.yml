@@ -5,15 +5,6 @@
 # Note a lot of logstash/ES activity happens here too
 # Because of service ordering.
 
-- name: Copy kibana yum repo file
-  copy:
-    src=kibana.repo
-    dest=/etc/yum.repos.d/kibana.repo
-    owner=root
-    group=root
-    mode=0644
-  become: true
-
 - name: Install kibana rpms
   yum: name={{ item }} state=present
   become: true
@@ -82,7 +73,10 @@
   become: true
 
 - name: Setup kibana service
-  service: name=kibana state=started enabled=true
+  systemd:
+    name: kibana
+    state: restarted
+    enabled: true
   become: true
 
 - name: Check Filebeat forwarder SSL certificate
@@ -145,8 +139,11 @@
 # We are in the kibana playbook but starting logstash here now
 # This is needed because perms should be set on certificates before
 # logstash references them for filebeat SSL connections.
-- name: Enable logstash service
-  service: name=logstash state=started enabled=true
+- name: Start and enable logstash service
+  systemd:
+    name: logstash
+    state: restarted
+    enabled: true
   become: true
   when: (logging_backend != 'fluentd')
 
@@ -226,12 +223,16 @@
   become: true
 
 - name: Restart rsyslogd to populate elasticsearch index
-  command: systemctl restart rsyslog.service
+  systemd:
+    name: rsyslog
+    state: restarted
   ignore_errors: true
   when: rsyslog_updated != 0
   become: true
 
-- name: Refresh fluentd service
-  command: systemctl restart td-agent.service
+- name: Restart fluentd service
+  systemd:
+    name: td-agent
+    state: restarted
   when: (logging_backend == 'fluentd')
   become: true

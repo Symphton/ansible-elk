@@ -4,6 +4,9 @@
 # change this if you use a non-root user for running Ansible playbooks
 ansible_system_user: root
 
+# Name of the monitoring cluster
+cluster_name: monos
+
 # EPEL Repository for extra packages
 epel_repo: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
@@ -23,7 +26,7 @@ epel_repo: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rp
 # as the current firewall code will detect this and leave it alone.
 # if you really, really want to disable checking/applying service firewall rules
 # then change to 'false' or empty
-manage_firewall: true
+manage_firewall: false
 
 ### nginx ###
 # add nonstandard port here for undercloud usage
@@ -34,7 +37,9 @@ manage_firewall: true
 # default is 80
 # e.g. 8888
 nginx_kibana_port: 80
-#
+
+# ip addres or dns name of your elk server
+elk_server: 10.127.202.236
 # usage: port filebeat client grabs the client SSL certificate
 # default is 8080
 # e.g. 9999
@@ -42,8 +47,8 @@ elk_server_ssl_cert_port: 8080
 #
 # Kibana options
 # change this to affect nginx-wrapped htpasswd authentication
-kibana_user: admin
-kibana_password: admin
+kibana_user: operator
+kibana_password: changeme
 
 ### logging backend ###
 # you can pick between logstash or fluentd
@@ -52,7 +57,7 @@ kibana_password: admin
 # logging_backend:
 # logging_backend: logstash
 # logging_backend: fluentd
-logging_backend:
+logging_backend: logstash
 #
 ### logstash options ###
 logstash_syslog_port: 5044
@@ -78,7 +83,7 @@ es_listen_external: false
 # https://www.elastic.co/guide/en/elasticsearch/client/curator/current/index.html
 # default is no (set to blank) or false
 # set the below variable to 'true' to activate
-install_curator_tool: false
+install_curator_tool: true
 ## X-PACK
 # This installs an additional suite of tools from elastic
 # https://www.elastic.co/guide/en/x-pack/current/xpack-introduction.html
@@ -91,17 +96,17 @@ install_curator_tool: false
 # DO NOT CHANGE THIS UNLESS YOU CHANGE IT ON ES
 xpack_elastic_user_password: changeme
 # install elastic x-pack
-install_elasticsearch_xpack: false
+install_elasticsearch_xpack: true
 # install kibana x-pack
-install_kibana_xpack: false
+install_kibana_xpack: true
 # install logstash x-pack
-install_logstash_xpack: false
+install_logstash_xpack: true
 
 #Install Metricbeat
-install_metricbeat: false
+install_metricbeat: true
 #Install Packetbeat
-install_packetbeat: false
+install_packetbeat: true
 
 #This should be installed on only one server in your environment.
 #Install Heartbeat
-install_heartbeat: false
+install_heartbeat: true

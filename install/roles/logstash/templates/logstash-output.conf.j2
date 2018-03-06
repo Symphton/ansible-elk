@@ -1,0 +1,7 @@
+output {
+  elasticsearch {
+    hosts => ["localhost:{{ es_local_port }}"]
+    sniffing => true
+    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+  }
+}

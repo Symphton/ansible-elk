@@ -11,8 +11,8 @@
 
 - name: Copy elasticsearch yum repo file
   copy:
-    src=elasticsearch.repo
-    dest=/etc/yum.repos.d/elasticsearch.repo
+    src=elastic.repo
+    dest=/etc/yum.repos.d/elastic.repo
     owner=root
     group=root
     mode=0644
@@ -23,7 +23,7 @@
   become: true
   with_items:
     - elasticsearch
-    - java-openjdk-headless
+    - java-1.8.0-openjdk
 
 - name: Copy templated elasticsearch.yml
   template:
@@ -79,29 +79,13 @@
   when: ansible_memory_mb.real.total|int < 65536
   register: elasticsearch_updated
 
-- name: Apply workaround for java listening port
-  raw: setcap 'cap_net_bind_service=+ep' /usr/lib/jvm/java-1.8.*openjdk-*/jre/bin/java
+- name: Start and enable elasticsearch service
+  systemd:
+    name: elasticsearch
+    state: restarted
+    enabled: true
   become: true
 
-# https://www.centos.org/forums/viewtopic.php?t=16398
-- name: Obtain exact version of JRE for libjli.so workaround
-  shell: "ls /usr/lib/jvm/ | grep java | grep openjdk-1"
-  register: libjli_location
-  become: true
-
-- name: Apply EL symlink workaround for libjli.so
-  file:
-    src='/usr/lib/jvm/{{libjli_location.stdout}}/jre/lib/amd64/jli/libjli.so'
-    dest='/lib64/libjli.so'
-    state=link
-  become: true
-
-- name: Start or restart elasticsearch service
-  command: systemctl restart elasticsearch.service
-  ignore_errors: true
-  when: elasticsearch_updated != 0
-  become: true
-
-- name: Setup elasticsearch service to autostart
-  service: name=elasticsearch state=started enabled=true
+- name: Create the default template without replication of shards
+  command: curl -XPUT 'localhost:9200/_template/default?pretty' -H 'Content-Type: application/json' -d '{"index_patterns": ["*"],"order" : 0,"settings": {"number_of_shards": 1,"number_of_replicas": 0}}'
   become: true
