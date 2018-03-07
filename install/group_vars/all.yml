@@ -39,7 +39,7 @@ manage_firewall: false
 nginx_kibana_port: 80
 
 # ip addres or dns name of your elk server
-elk_server: 10.127.202.236
+elk_server: 10.127.202.235
 # usage: port filebeat client grabs the client SSL certificate
 # default is 8080
 # e.g. 9999

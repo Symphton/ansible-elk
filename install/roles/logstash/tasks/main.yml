@@ -9,28 +9,10 @@
   with_items:
     - logstash
 
-- name: Copy logstash syslog configuration
-  template:
-    src=logstash-syslog.conf.j2
-    dest=/etc/logstash/conf.d/logstash-syslog.conf
-    owner=logstash
-    group=logstash
-    mode=0644
-  become: true
-
 - name: Copy logstash beats configuration
   copy:
     src=logstash-beats.conf
     dest=/etc/logstash/conf.d/logstash-beats.conf
-    owner=logstash
-    group=logstash
-    mode=0644
-  become: true
-
-- name: Copy logstash filter configuration
-  copy:
-    src=logstash-filter.conf
-    dest=/etc/logstash/conf.d/logstash-filter.conf
     owner=logstash
     group=logstash
     mode=0644

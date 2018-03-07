@@ -25,6 +25,11 @@
     - elasticsearch
     - java-1.8.0-openjdk
 
+- name: Check if elasticsearch xpack is installed
+  stat: path=/usr/share/elasticsearch/plugins/x-pack
+  register: check_es_xpack_path
+  become: true
+
 - name: Copy templated elasticsearch.yml
   template:
     src=elasticsearch.yml.j2
@@ -33,7 +38,16 @@
     group=elasticsearch
     mode=0660
   become: true
-  ignore_errors: true
+
+- name: Add xpack license
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    line: 'xpack.license.self_generated.type: basic'
+    regexp: "^xpack.license"
+    state: present
+    insertafter: EOF
+  when: check_es_xpack_path.stat.exists == True
+  become: true
 
 - name: Check if system memory is greater than 64G
   debug: msg="System memory is {{ansible_memory_mb.real.total | int}} so setting heapsize to 32G upper limit"
@@ -86,6 +100,22 @@
     enabled: true
   become: true
 
+- name: Check if elasticsearch is listening on port 9200
+  wait_for:
+    host: localhost
+    port: 9200
+    delay: 10
+    connect_timeout: 5
+    timeout: 420
+    state: started
+  become: true
+
 - name: Create the default template without replication of shards
-  command: curl -XPUT 'localhost:9200/_template/default?pretty' -H 'Content-Type: application/json' -d '{"index_patterns": ["*"],"order" : 0,"settings": {"number_of_shards": 1,"number_of_replicas": 0}}'
+  uri:
+    url: http://localhost:9200/_template/default?pretty
+    method: PUT
+    body: '{"index_patterns": ["*"],"order" : 0,"settings": {"number_of_shards": 1,"number_of_replicas": 0}}'
+    body_format: json
+    headers:
+      Content-Type: "application/json"
   become: true
